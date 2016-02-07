@@ -1,0 +1,11 @@
+*.pyc
+*.egg
+*.egg-info
+.DS_Store
+__pycache__
+
+.earwigbot
+*.min.js
+*.min.css
+logs/*
+!logs/.gitinclude
