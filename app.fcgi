@@ -20,4 +20,4 @@ def index():
 
 if __name__ == '__main__':
     from flup.server.fcgi import WSGIServer
-    WSGIServer(myapp).run()
+    WSGIServer(app).run()
