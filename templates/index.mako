@@ -12,7 +12,7 @@
     <div id="error">
         % if result["error"] == "no page":
             <p>Can't find the given page: <a href="${result['page'].url}">${result["page"].title | h}</a>.</p>
-        % else
+        % else:
             An unknown error occurred.
         % endif
     </div>

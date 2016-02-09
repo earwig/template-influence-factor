@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /data/project/earwig-dev/env/bin/python
 # -*- coding: utf-8  -*-
 
 from flask import Flask
@@ -19,4 +19,5 @@ def index():
     return render_template("index.mako", result=result)
 
 if __name__ == '__main__':
-    app.run()
+    from flup.server.fcgi import WSGIServer
+    WSGIServer(myapp).run()
