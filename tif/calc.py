@@ -22,28 +22,28 @@ def _get_db(bot):
     args["autoreconnect"] = True
     return connect(**args)
 
-def _count_transclusions(cursor, title):
+def _count_transclusions(cursor, title, ns):
     query = """SELECT COUNT(*)
         FROM {0}.templatelinks
-        WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0"""
-    cursor.execute(query.format(SITE_DB), (title,))
+        WHERE tl_title = ? AND tl_namespace = ? AND tl_from_namespace = 0"""
+    cursor.execute(query.format(SITE_DB), (title, ns))
     return cursor.fetchall()[0][0]
 
-def _count_views(cursor, title):
+def _count_views(cursor, title, ns):
     query = """SELECT SUM(cache_views), MIN(cache_time)
         FROM {0}.templatelinks
         INNER JOIN cache ON tl_from = cache_id
-        WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0"""
-    cursor.execute(query.format(SITE_DB), (title,))
+        WHERE tl_title = ? AND tl_namespace = ? AND tl_from_namespace = 0"""
+    cursor.execute(query.format(SITE_DB), (title, ns))
     return cursor.fetchall()[0]
 
 def _get_avg_views(site, article):
     url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
            "{0}.{1}/all-access/user/{2}/daily/{3}/{4}")
     days = 30
-    slug = quote(article.replace(" ", "_"), safe="")
-    start = datetime.utcnow().strftime("%Y%M%D")
-    end = (datetime.utcnow() - timedelta(days=days)).strftime("%Y%M%D")
+    slug = quote(article, safe="")
+    start = (datetime.utcnow() - timedelta(days=days)).strftime("%Y%m%d")
+    end = datetime.utcnow().strftime("%Y%m%d")
     query = url.format(site.lang, site.project, slug, start, end)
 
     try:
@@ -66,33 +66,37 @@ def _get_avg_views(site, article):
         return None
     return sum(item["views"] for item in res["items"]) / float(days)
 
-def _update_views(cursor, site, title):
+def _update_views(cursor, site, title, ns):
     cache_life = "7 DAY"
-    query1 = """SELECT tl_from
+    query1 = """SELECT tl_from, page_title
         FROM {0}.templatelinks
+        LEFT JOIN page ON tl_from = page_id
         LEFT JOIN cache ON tl_from = cache_id
-        WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0 AND
+        WHERE tl_title = ? AND tl_namespace = ? AND tl_from_namespace = 0 AND
             (cache_id IS NULL OR cache_time < DATE_SUB(NOW(), INTERVAL {1}))"""
     query2 = """INSERT INTO cache (cache_id, cache_views, cache_time)
             VALUES (?, ?, NOW()) ON DUPLICATE KEY
             UPDATE cache_views = ?, cache_time = NOW()"""
 
-    cursor.execute(query1.format(SITE_DB, cache_life), (title,))
+    cursor.execute(query1.format(SITE_DB, cache_life), (title, ns))
     while True:
         titles = cursor.fetchmany(1024)
         if not titles:
             break
 
-        viewcounts = [(t, _get_avg_views(site, t)) for t in titles]
-        parambatch = [(t, v, v) for (t, v) in viewcounts if v is not None]
+        viewcounts = [(pageid, _get_avg_views(site, name))
+                      for (pageid, name) in titles]
+        parambatch = [(i, v, v) for (i, v) in viewcounts if v is not None]
         cursor.executemany(query2, parambatch)
 
 def _compute_stats(db, page):
-    title = page.title.replace(" ", "_")
+    title = page.title.split(":", 1)[-1].replace(" ", "_")
+    title = title[0].upper() + title[1:]
+
     with db.cursor() as cursor:
-        transclusions = _count_transclusions(cursor, title)
-        _update_views(cursor, page.site, title)
-        tif, cache_time = _count_views(cursor, title)
+        transclusions = _count_transclusions(cursor, title, page.namespace)
+        _update_views(cursor, page.site, title, page.namespace)
+        tif, cache_time = _count_views(cursor, title, page.namespace)
     return tif, transclusions, cache_time
 
 def _format_time(cache_time):
