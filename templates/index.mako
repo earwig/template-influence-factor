@@ -24,7 +24,7 @@
         <table>
             <tr>
                 <td>TIF</td>
-                <td>${result["tif"]}</td>
+                <td>${"{0:.2f}".format(result["tif"])}</td>
             </tr>
             <tr>
                 <td>Transclusions</td>
