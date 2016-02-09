@@ -1,7 +1,7 @@
 #! /data/project/earwig-dev/env/bin/python
 # -*- coding: utf-8  -*-
 
-from flask import Flask
+from flask import Flask, request
 from flask.ext.mako import MakoTemplates, render_template
 
 from tif.calc import calculate_tif
