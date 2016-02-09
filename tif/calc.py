@@ -15,13 +15,18 @@ def _get_db(bot):
     args["autoreconnect"] = True
     return connect(**args)
 
-def _get_transclusions(page):
-    # TODO
-    yield page
+def _compute_stats(page, db):
+    with db.cursor() as cursor:
+        query = """SELECT COUNT(*) FROM templatelinks WHERE tl_title = ?
+                   AND tl_namespace = 10 AND tl_from_namespace = 0"""
+        cursor.execute(query, (page.title.replace(" ", "_"),))
+        transclusions = cursor.fetchall()[0][0]
 
-def _get_view_average(page, db, cache_info):
-    # TODO
-    return 0.0
+        # TODO
+        tif = 0.0
+        cache_time = None
+
+    return tif, transclusions, cache_time
 
 def _format_time(cache_time):
     formatter = lambda n, w: "{0} {1}{2}".format(n, w, "" if n == 1 else "s")
@@ -36,27 +41,19 @@ def calculate_tif(title):
     bot = Bot(".earwigbot")
     db = _get_db(bot)
     site = bot.wiki.get_site()
-    template = site.get_page(title)
-    result = {"title": title, "page": template}
+    page = site.get_page(title)
+    result = {"title": title, "page": page}
 
-    if template.exists != template.PAGE_EXISTS:
+    if page.exists != page.PAGE_EXISTS:
         result["error"] = "no page"
         return result
 
-    tif = 0.0
-    transclusions = 0
-    cache_info = {"cache": False, "cache_time_raw": None}
-    for page in _get_transclusions(template):
-        tif += _get_view_average(page, db, cache_info)
-        transclusions += 1
-
-    if cache_info["cache"]:
-        ctime = cache_info["cache_time"]
-        cache_info["cache_time"] = ctime.strftime("%b %d, %Y %H:%M:%S UTC")
-        cache_info["cache_ago"] = _format_time(ctime)
+    tif, transclusions, cache_time = _compute_stats(page, db)
 
     result["tif"] = tif
     result["transclusions"] = transclusions
-    result["protection"] = template.protection
-    result.update(cache_info)
+    result["protection"] = page.protection
+    if cache_time:
+        result["cache_time"] = cache_time.strftime("%b %d, %Y %H:%M:%S UTC")
+        result["cache_ago"] = _format_time(cache_time)
     return result

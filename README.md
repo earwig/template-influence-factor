@@ -20,7 +20,8 @@ Running
 
 - Install all dependencies listed above.
 
-- Create an SQL database ...
+- Create an SQL database based on `schema.sql` on the same server as your
+  MediaWiki database.
 
 - Create an earwigbot instance in `.earwigbot` (run `earwigbot .earwigbot`). In
   `.earwigbot/config.yml`, fill out the connection info for the database by
