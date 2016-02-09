@@ -15,7 +15,7 @@ set_up_hash_caching(app)
 @catch_errors(app)
 def index():
     title = request.args.get("title")
-    result = calculate_tif(title) if title else None
+    result = calculate_tif(title) if title else {}
     return render_template("index.mako", result=result)
 
 if __name__ == '__main__':
