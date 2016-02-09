@@ -13,6 +13,8 @@ from oursql import connect
 
 __all__ = ["calculate_tif"]
 
+SITE_DB = "enwiki_p"
+
 def _get_db(bot):
     args = bot.config.wiki["_tifSQL"]
     args["read_default_file"] = expanduser("~/.my.cnf")
@@ -22,17 +24,17 @@ def _get_db(bot):
 
 def _count_transclusions(cursor, title):
     query = """SELECT COUNT(*)
-        FROM templatelinks
+        FROM {0}.templatelinks
         WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0"""
-    cursor.execute(query, (title,))
+    cursor.execute(query.format(SITE_DB), (title,))
     return cursor.fetchall()[0][0]
 
-def _count_views(cursor, title, dbname):
+def _count_views(cursor, title):
     query = """SELECT SUM(cache_views), MIN(cache_time)
-        FROM templatelinks
-        INNER JOIN {0}.cache ON tl_from = cache_id
+        FROM {0}.templatelinks
+        INNER JOIN cache ON tl_from = cache_id
         WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0"""
-    cursor.execute(query.format(dbname), (title,))
+    cursor.execute(query.format(SITE_DB), (title,))
     return cursor.fetchall()[0]
 
 def _get_avg_views(site, article):
@@ -64,19 +66,18 @@ def _get_avg_views(site, article):
         return None
     return sum(item["views"] for item in res["items"]) / float(days)
 
-def _update_views(cursor, site, title, dbname):
+def _update_views(cursor, site, title):
     cache_life = "7 DAY"
     query1 = """SELECT tl_from
-        FROM templatelinks
-        LEFT JOIN {0}.cache ON tl_from = cache_id
-        WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0
-            AND cache_id IS NULL
-            OR DATE_SUB(NOW(), INTERVAL {1}) > cache_time"""
-    query2 = """INSERT INTO {0}.cache (cache_id, cache_views, cache_time)
+        FROM {0}.templatelinks
+        LEFT JOIN cache ON tl_from = cache_id
+        WHERE tl_title = ? AND tl_namespace = 10 AND tl_from_namespace = 0 AND
+            (cache_id IS NULL OR cache_time < DATE_SUB(NOW(), INTERVAL {1}))"""
+    query2 = """INSERT INTO cache (cache_id, cache_views, cache_time)
             VALUES (?, ?, NOW()) ON DUPLICATE KEY
-            UPDATE cache_views = ?, cache_time = NOW()""".format(dbname)
+            UPDATE cache_views = ?, cache_time = NOW()"""
 
-    cursor.execute(query1.format(dbname, cache_life), (title,))
+    cursor.execute(query1.format(SITE_DB, cache_life), (title,))
     while True:
         titles = cursor.fetchmany(1024)
         if not titles:
@@ -86,15 +87,12 @@ def _update_views(cursor, site, title, dbname):
         parambatch = [(t, v, v) for (t, v) in viewcounts if v is not None]
         cursor.executemany(query2, parambatch)
 
-def _compute_stats(bot, db, page):
-    dbname = bot.config.wiki["_tifSQL"]["db"]
+def _compute_stats(db, page):
     title = page.title.replace(" ", "_")
-
     with db.cursor() as cursor:
         transclusions = _count_transclusions(cursor, title)
-        _update_views(cursor, page.site, title, dbname)
-        tif, cache_time = _count_views(cursor, title, dbname)
-
+        _update_views(cursor, page.site, title)
+        tif, cache_time = _count_views(cursor, title)
     return tif, transclusions, cache_time
 
 def _format_time(cache_time):
@@ -117,7 +115,7 @@ def calculate_tif(title):
         result["error"] = "no page"
         return result
 
-    tif, transclusions, cache_time = _compute_stats(bot, db, page)
+    tif, transclusions, cache_time = _compute_stats(db, page)
 
     result["tif"] = tif
     result["transclusions"] = transclusions
