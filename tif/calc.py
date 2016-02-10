@@ -64,13 +64,14 @@ def _get_avg_views(site, article):
 
     if "items" not in res:
         return None
-    return sum(item["views"] for item in res["items"]) / float(days)
+    total_views = sum(item["views"] for item in res["items"])
+    return total_views / (float(days) * 24 * 60)
 
 def _update_views(cursor, site, title, ns):
     cache_life = "7 DAY"
     query1 = """SELECT tl_from, page_title
         FROM {0}.templatelinks
-        LEFT JOIN page ON tl_from = page_id
+        LEFT JOIN {0}.page ON tl_from = page_id
         LEFT JOIN cache ON tl_from = cache_id
         WHERE tl_title = ? AND tl_namespace = ? AND tl_from_namespace = 0 AND
             (cache_id IS NULL OR cache_time < DATE_SUB(NOW(), INTERVAL {1}))"""

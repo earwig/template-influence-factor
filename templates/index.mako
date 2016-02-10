@@ -24,7 +24,7 @@
         <table>
             <tr>
                 <td>TIF</td>
-                <td>${"{0:.2f}".format(result["tif"])}</td>
+                <td>${"{0:.2f}".format(result["tif"])} views/min</td>
             </tr>
             <tr>
                 <td>Transclusions</td>
