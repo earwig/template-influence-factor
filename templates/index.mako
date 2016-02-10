@@ -1,7 +1,7 @@
 <%include file="/support/header.mako" args="title='TIF Calculator'"/>
 <form action="${request.script_root}" method="get">
     % if "title" in result:
-        <input type="text" name="title" value="${query['page'].title if 'page' in query else query['title'] | h}" />
+        <input type="text" name="title" value="${result['page'].title if 'page' in result else result['title'] | h}" />
     % else:
         <input type="text" name="title" />
     % endif

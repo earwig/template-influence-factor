@@ -3,7 +3,7 @@ CREATE DATABASE `sXXXXX__tif`;
 DROP TABLE IF EXISTS `cache`;
 CREATE TABLE `cache` (
   `cache_id` INT(10) UNSIGNED NOT NULL,
-  `cache_views` FLOAT NOT NULL,
+  `cache_views` DOUBLE NOT NULL,
   `cache_time` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`cache_id`)
 ) ENGINE=InnoDB;
