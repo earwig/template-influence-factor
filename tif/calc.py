@@ -109,6 +109,10 @@ def _format_time(cache_time):
         return formatter(diff.seconds / 60, "minute")
     return formatter(diff.seconds, "second")
 
+def _get_protection(page):
+    edit = [prot for prot in page.protection if prot["type"] == "edit"]
+    return edit or None
+
 def calculate_tif(title):
     bot = Bot(".earwigbot")
     db = _get_db(bot)
@@ -124,7 +128,7 @@ def calculate_tif(title):
 
     result["tif"] = tif
     result["transclusions"] = transclusions
-    result["protection"] = page.protection
+    result["protection"] = _get_protection(page)
     if cache_time:
         result["cache_time"] = cache_time.strftime("%b %d, %Y %H:%M:%S UTC")
         result["cache_ago"] = _format_time(cache_time)

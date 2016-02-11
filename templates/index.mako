@@ -20,7 +20,7 @@
 
 % if "tif" in result:
     <div id="result">
-        <div id="result-page"><a href="${result['page'].url}">${result["page"].title | h}</a></div>
+        <div class="result-page"><a href="${result['page'].url}">${result["page"].title | h}</a></div>
         <table>
             <tr>
                 <td>TIF</td>
@@ -32,10 +32,14 @@
             </tr>
             <tr>
                 <td>Protection</td>
-                <td>${result["protection"]}</td>
+                % if result["protection"]:
+                    <td><span class="prot-level prot-${result['protection']['level']}">${result["protection"]["level"]}</span> until <span class="prot-expiry">${result["protection"]["expiry"]}</span></td>
+                % else:
+                    <td><span class="prot-none">None</span></td>
+                % endif
             </tr>
         </table>
-        % if "cache" in result and result["cache"]:
+        % if "cache_time" in result:
             <div id="result-cache">Pageview data is cached from up to <abbr title="${result['cache_time']}">${result["cache_age"]} ago</abbr>.</div>
         % endif
     </div>
