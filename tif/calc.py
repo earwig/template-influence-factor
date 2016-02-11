@@ -111,7 +111,7 @@ def _format_time(cache_time):
 
 def _get_protection(page):
     edit = [prot for prot in page.protection if prot["type"] == "edit"]
-    return edit or None
+    return edit[0] if edit else None
 
 def calculate_tif(title):
     bot = Bot(".earwigbot")
@@ -131,5 +131,5 @@ def calculate_tif(title):
     result["protection"] = _get_protection(page)
     if cache_time:
         result["cache_time"] = cache_time.strftime("%b %d, %Y %H:%M:%S UTC")
-        result["cache_ago"] = _format_time(cache_time)
+        result["cache_age"] = _format_time(cache_time)
     return result
