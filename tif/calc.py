@@ -108,12 +108,12 @@ def _format_time(cache_time):
     diff = datetime.utcnow() - cache_time
     total_seconds = diff.days * 86400 + diff.seconds
     if total_seconds > 86400:
-        return format(diff.seconds / 86400, "day")
+        return formatter(total_seconds / 86400, "day")
     if total_seconds > 3600:
-        return format(diff.seconds / 3600, "hour")
+        return formatter(total_seconds / 3600, "hour")
     if total_seconds > 60:
-        return format(diff.seconds / 60, "minute")
-    return format(total_seconds, "second")
+        return formatter(total_seconds / 60, "minute")
+    return formatter(total_seconds, "second")
 
 def _get_protection(page):
     edit = [prot for prot in page.protection if prot["type"] == "edit"]
