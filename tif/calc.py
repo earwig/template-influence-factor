@@ -70,7 +70,7 @@ def _get_avg_views(site, article):
 def _update_views(cursor, site, title, ns):
     cache_life = "7 DAY"
     query1 = """DELETE FROM cache
-        WHERE cache_time < DATE_SUB(NOW(), INTERVAL {1})"""
+        WHERE cache_time < DATE_SUB(NOW(), INTERVAL {0})"""
     query2 = """SELECT tl_from, page_title
         FROM {0}.templatelinks
         LEFT JOIN {0}.page ON tl_from = page_id
