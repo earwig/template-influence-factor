@@ -69,17 +69,20 @@ def _get_avg_views(site, article):
 
 def _update_views(cursor, site, title, ns):
     cache_life = "7 DAY"
-    query1 = """SELECT tl_from, page_title
+    query1 = """DELETE FROM cache
+        WHERE cache_time < DATE_SUB(NOW(), INTERVAL {1})"""
+    query2 = """SELECT tl_from, page_title
         FROM {0}.templatelinks
         LEFT JOIN {0}.page ON tl_from = page_id
         LEFT JOIN cache ON tl_from = cache_id
-        WHERE tl_title = ? AND tl_namespace = ? AND tl_from_namespace = 0 AND
-            (cache_id IS NULL OR cache_time < DATE_SUB(NOW(), INTERVAL {1}))"""
-    query2 = """INSERT INTO cache (cache_id, cache_views, cache_time)
+        WHERE tl_title = ? AND tl_namespace = ? AND tl_from_namespace = 0
+            AND cache_id IS NULL"""
+    query3 = """INSERT INTO cache (cache_id, cache_views, cache_time)
             VALUES (?, ?, NOW()) ON DUPLICATE KEY
             UPDATE cache_views = ?, cache_time = NOW()"""
 
-    cursor.execute(query1.format(SITE_DB, cache_life), (title, ns))
+    cursor.execute(query1.format(cache_life))
+    cursor.execute(query2.format(SITE_DB), (title, ns))
     while True:
         titles = cursor.fetchmany(1024)
         if not titles:
@@ -88,7 +91,7 @@ def _update_views(cursor, site, title, ns):
         viewcounts = [(pageid, _get_avg_views(site, name))
                       for (pageid, name) in titles]
         parambatch = [(i, v, v) for (i, v) in viewcounts if v is not None]
-        cursor.executemany(query2, parambatch)
+        cursor.executemany(query3, parambatch)
 
 def _compute_stats(db, page):
     title = page.title.split(":", 1)[-1].replace(" ", "_")
