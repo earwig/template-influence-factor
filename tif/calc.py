@@ -106,11 +106,14 @@ def _compute_stats(db, page):
 def _format_time(cache_time):
     formatter = lambda n, w: "{0} {1}{2}".format(n, w, "" if n == 1 else "s")
     diff = datetime.utcnow() - cache_time
-    if diff.seconds > 3600:
-        return formatter(diff.seconds / 3600, "hour")
-    if diff.seconds > 60:
-        return formatter(diff.seconds / 60, "minute")
-    return formatter(diff.seconds, "second")
+    total_seconds = diff.days * 86400 + diff.seconds
+    if total_seconds > 86400:
+        return format(diff.seconds / 86400, "day")
+    if total_seconds > 3600:
+        return format(diff.seconds / 3600, "hour")
+    if total_seconds > 60:
+        return format(diff.seconds / 60, "minute")
+    return format(total_seconds, "second")
 
 def _get_protection(page):
     edit = [prot for prot in page.protection if prot["type"] == "edit"]
