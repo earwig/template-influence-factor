@@ -1,19 +1,88 @@
-header {}
+body {
+    font-family: sans-serif;
+    background-color: white;
+    color: black;
+}
 
-footer {}
+a {
+    color: #1144BB;
+    text-decoration: none;
+}
 
-#container {}
+a:hover {
+    color: #112277;
+    text-decoration: underline;
+}
 
-#error {}
+header {
+    margin: 0 0 1em 0.5em;
+}
 
-#result {}
+header h1 {
+    margin: 0 0 0.33em;
+}
 
-#result-cache {}
+header p {
+    margin: 0;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1em 1em 1.5em;
+    background-color: white;
+    text-align: center;
+    font-size: 85%;
+}
+
+#container {
+    margin: 1em 0 0 0.5em;
+}
+
+#main-form input[name="title"] {
+    width: 30em;
+}
+
+#main-form button[type="submit"] {
+    margin-left: 1em;
+}
+
+#error {
+    margin-top: 2em;
+    background-color: #FFE0E0;
+}
+
+#result {
+    margin-top: 2em;
+}
+
+#result table {
+    margin-top: 0.5em;
+}
+
+#result-cache {
+    margin-top: 1em;
+    font-size: 85%;
+    font-style: italic;
+}
 
 .result-page {}
 
-.prot-level {}
+.prot-autoconfirmed {
+    color: #070;
+}
 
-.prot-expiry {}
+.prot-templateeditor {
+    color: #970;
+}
 
-.prot-none {}
+.prot-sysop {
+    color: #A00;
+}
+
+.prot-none {
+    font-style: italic;
+    color: #555;
+}

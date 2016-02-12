@@ -1,5 +1,5 @@
 <%include file="/support/header.mako" args="title='TIF Calculator'"/>
-<form action="${request.script_root}" method="get">
+<form id="main-form" action="${request.script_root}" method="get">
     % if "title" in result:
         <input type="text" name="title" value="${result['page'].title if 'page' in result else result['title'] | h}" />
     % else:
@@ -35,7 +35,7 @@
                 % if result["protection"]:
                     <td><span class="prot-level prot-${result['protection']['level']}">${result["protection"]["level"]}</span> until <span class="prot-expiry">${result["protection"]["expiry"]}</span></td>
                 % else:
-                    <td><span class="prot-none">None</span></td>
+                    <td><span class="prot-none">none</span></td>
                 % endif
             </tr>
         </table>
