@@ -24,11 +24,11 @@
         <table>
             <tr>
                 <td>TIF</td>
-                <td>${"{0:.2f}".format(result["tif"])} views/min</td>
+                <td>${"{0:.2f}".format(result["tif"])} <span class="unit">views/min</span></td>
             </tr>
             <tr>
                 <td>Transclusions</td>
-                <td>${result["transclusions"]}</td>
+                <td>${result["transclusions"]} <span class="unit">pages</span></td>
             </tr>
             <tr>
                 <td>Protection</td>

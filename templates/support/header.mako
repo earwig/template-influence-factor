@@ -10,6 +10,6 @@
     <body>
         <header>
             <h1><a href="${request.script_root}">TIF Calculator</a></h1>
-            <p>Calculate the <a href="https://en.wikipedia.org/wiki/User:The_Earwig/Sandbox/TIF">template influence factor</a> of any page on the English Wikipedia</p>
+            <p>Calculate the <a href="https://en.wikipedia.org/wiki/User:The_Earwig/Sandbox/TIF">template influence factor</a> of any page on the English Wikipedia.</p>
         </header>
         <div id="container">

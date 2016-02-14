@@ -86,3 +86,7 @@ footer {
     font-style: italic;
     color: #555;
 }
+
+.unit {
+    font-size: small;
+}
